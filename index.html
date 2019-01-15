@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Yields</title>
+    </head>
+    <body>
+      <h1>Yield</h1>
+      <button onclick="getDataM()">Current Month</button>
+      <button onclick="getDataY()">Current Year</button>
+      <br>
+      <br>
+      <p>Enter a Custom Year [1990 to Present]</p>
+      <input type="text" id="year"></input>
+      <button onclick="getDataCY()">Submit</button>
+      <div>
+          <a href="https://plot.ly/~AlexYucs/0/?share_key=TiWYH0NJVkxsJ8ThWWWgWY" target="_blank" title="basic-line" style="display: block; text-align: center;"><img src="https://plot.ly/~AlexYucs/0.png?share_key=TiWYH0NJVkxsJ8ThWWWgWY" alt="basic-line" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+          <script data-plotly="AlexYucs:0" sharekey-plotly="TiWYH0NJVkxsJ8ThWWWgWY" src="https://plot.ly/embed.js" async></script>
+      </div>
+    </body>
+  </html>
+
+<script>
+
+//Custom Year data
+function getDataCY(){
+  var request = require('request');
+  var year = document.getElementById('year').value
+  var curr_year =(new Date()).getFullYear();
+  if( !isNaN(year) && year>=1990 && year<= curr_year){ //check validity
+    request(' https://www.treasury.gov/resource-center/data-chart-center/interest-rates/pages/XmlView.aspx?data=yieldyear&year='+year, function (error, response, body) {
+      printData(body);
+    });
+  }
+  else{
+    alert("Enter a valid year.")
+  }
+}
+
+//Year data
+function getDataY(){
+  var request = require('request');
+  //year https://www.treasury.gov/resource-center/data-chart-center/interest-rates/pages/XmlView.aspx?data=yieldyear&year=2018
+  var year =(new Date()).getFullYear();
+  request(' https://www.treasury.gov/resource-center/data-chart-center/interest-rates/pages/XmlView.aspx?data=yieldyear&year='+year, function (error, response, body) {
+    printData(body);
+  });
+}
+
+//Month Data
+function getDataM(){
+  var request = require('request');
+  //month https://www.treasury.gov/resource-center/data-chart-center/interest-rates/pages/XmlView.aspx?data=yield
+  request('https://www.treasury.gov/resource-center/data-chart-center/interest-rates/pages/XmlView.aspx?data=yield', function (error, response, body) {
+    printData(body);
+  });
+}
+
+//Parse and Graph
+function printData(str){
+  const jsdom = require("jsdom");
+  const { JSDOM } = jsdom;
+  const dom = new JSDOM(str);
+
+  //Scraped data for year 1 and 10 bonds
+  var nodeList1 = dom.window.document.querySelectorAll("d\\:BC_1YEAR");
+  var nodeList10 = dom.window.document.querySelectorAll("d\\:BC_10YEAR");
+
+  //final vars for graphing
+  var result = [];
+  var time = [];
+
+  //add difference of 10 and 1 year bonds to vars
+  for(i=0; i < nodeList1.length; i++){
+    var temp = parseFloat(nodeList10[i].textContent) - parseFloat(nodeList1[i].textContent);
+    result.push(temp)
+    time.push(i)
+  }
+
+  //Graph
+  var plotly = require('plotly')("AlexYucs", "eGHfmFtDBpCHMZyYAEST");
+  var trace1 = {
+    x: time,
+    y: result,
+    type: "scatter"
+  };
+  var data = [trace1];
+  var graphOptions = {filename: "basic-line", fileopt: "overwrite"};
+  plotly.plot(data, graphOptions, function (err, msg) {
+      console.log(msg);
+      setTimeout(location.reload(true), 3000) //refresh to display after data entered
+  });
+}
+</script>

@@ -1,0 +1,19 @@
+{
+  "name": "yield",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "start",
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^2.0.8"
+  },
+  "dependencies": {
+    "jsdom": "^12.0.0",
+    "plotly": "^1.0.6"
+  }
+}
